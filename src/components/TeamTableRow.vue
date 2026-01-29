@@ -66,8 +66,8 @@
           <Button 
             @click="handleDelete"
             size="sm"
-            variant="ghost"
-            class="h-7 text-xs gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+            variant="destructive"
+            class="h-7 text-xs gap-1"
             :disabled="isLoading"
           >
             <Trash2Icon class="w-3 h-3" />
