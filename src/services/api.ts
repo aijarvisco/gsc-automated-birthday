@@ -3,9 +3,10 @@ import type {
   ProcessEmployeesResponse,
   GenerateBirthdayImagesRequest,
   GenerateBirthdayImagesResponse,
+  GetAllCollaboratorsResponse,
   ApiResponse 
 } from '@/types/api'
-import type { EmployeeData } from '@/types/employee'
+import type { EmployeeData, LifetimeCollaborator } from '@/types/employee'
 
 const API_BASE = 'https://n8n.aijarvis.co/webhook/gsc'
 
@@ -57,6 +58,14 @@ class ApiService {
     return this.makeRequest<GenerateBirthdayImagesResponse>(endpoint, {
       method: 'POST',
       body: JSON.stringify(employees),
+    })
+  }
+
+  async getAllCollaborators(): Promise<ApiResponse<GetAllCollaboratorsResponse>> {
+    const endpoint = `${API_BASE}/rhbd/get-all-collaborators`
+    
+    return this.makeRequest<GetAllCollaboratorsResponse>(endpoint, {
+      method: 'GET',
     })
   }
 

@@ -59,3 +59,15 @@ export interface GenerationResultItem {
 export interface GenerateBirthdayImagesResponse {
   generationResult: GenerationResultItem[]
 }
+
+export interface GetAllCollaboratorsResponse {
+  collaborators: Array<{
+    id: number
+    name: string
+    team: string
+    image_url: string
+    created_at: string
+    number: string
+    birthday_date: string
+  }>
+}

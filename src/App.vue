@@ -4,10 +4,10 @@
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-white mb-2">
-          {{ currentPage === 'workflow' ? 'Birthday Messages Workflow' : 'Teams Management' }}
+          {{ getPageTitle() }}
         </h1>
         <p class="text-blue-100">
-          {{ currentPage === 'workflow' ? 'Process employee data and generate personalized birthday content' : 'Manage team name mappings and standardization' }}
+          {{ getPageDescription() }}
         </p>
       </div>
 
@@ -31,6 +31,11 @@
         <!-- Teams Management Page -->
         <div v-if="currentPage === 'teams'">
           <TeamsManagement />
+        </div>
+
+        <!-- Processed Images Archive Page -->
+        <div v-else-if="currentPage === 'archive'">
+          <ProcessedImagesArchive @navigate-to-workflow="handleNavigateToWorkflow" />
         </div>
 
         <!-- Workflow Content -->
@@ -273,6 +278,7 @@ import DataProcessedOverview from '@/components/DataProcessedOverview.vue'
 import DataValidation from '@/components/DataValidation.vue'
 import Navigation from '@/components/Navigation.vue'
 import TeamsManagement from '@/components/TeamsManagement.vue'
+import ProcessedImagesArchive from '@/components/ProcessedImagesArchive.vue'
 import GeneratedMessagesTable from '@/components/GeneratedMessagesTable.vue'
 import { useWorkflow } from '@/composables/useWorkflow'
 import type { EmployeeData, EmployeeValidation } from '@/types/employee'
@@ -302,7 +308,7 @@ const progressText = ref('')
 const showProgress = ref(false)
 
 // Page navigation state
-const currentPage = ref<'workflow' | 'teams'>('workflow')
+const currentPage = ref<'workflow' | 'teams' | 'archive'>('workflow')
 
 const handleFileProcessed = (data: EmployeeData[]) => {
   setRawData(data)
@@ -365,6 +371,36 @@ const handleGenerateMessages = async () => {
   }
 }
 
-const handlePageChange = (page: 'workflow' | 'teams') => {
+const handlePageChange = (page: 'workflow' | 'teams' | 'archive') => {
   currentPage.value = page
+}
+
+const getPageTitle = () => {
+  switch (currentPage.value) {
+    case 'workflow':
+      return 'Birthday Messages Workflow'
+    case 'teams':
+      return 'Teams Management'
+    case 'archive':
+      return 'Processed Images Archive'
+    default:
+      return 'Birthday Messages Workflow'
+  }
+}
+
+const getPageDescription = () => {
+  switch (currentPage.value) {
+    case 'workflow':
+      return 'Process employee data and generate personalized birthday content'
+    case 'teams':
+      return 'Manage team name mappings and standardization'
+    case 'archive':
+      return 'View and manage all lifetime processed birthday images'
+    default:
+      return 'Process employee data and generate personalized birthday content'
+  }
+}
+
+const handleNavigateToWorkflow = () => {
+  currentPage.value = 'workflow'
 }</script>

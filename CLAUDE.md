@@ -23,8 +23,9 @@ This is an internal HR tool for generating AI-powered birthday messages for comp
 ### Application Areas
 - **Team Names Management**: Interface for viewing and editing team name mappings (initial_name → correct_name). Users can list existing teams, edit team's correct names, and delete teams. Each action triggers database updates via API.
 - **Image Generation Flow**: Complete workflow for processing employee data files, validation, and generating birthday messages
+- **Processed Images Archive**: Comprehensive view of all lifetime processed birthday images with advanced search and filtering capabilities. Users can search by number, name, or team, filter by birthday month, and export data to CSV.
 
-*Note: The Vue application now implements the full workflow including validation and Teams Management interface.*
+*Note: The Vue application now implements the full workflow including validation, Teams Management interface, and the Processed Images Archive.*
 
 ## Architecture
 
@@ -134,6 +135,29 @@ The application integrates with a broader API system for the full birthday messa
   - **Purpose**: Remove team mappings from the database
   - **Input**: Array of team objects to delete
   - **Output**: Success/failure response
+
+#### Archive Management API
+- **Get All Collaborators**: `https://n8n.aijarvis.co/webhook/gsc/rhbd/get-all-collaborators`
+  - **Method**: GET
+  - **Purpose**: Retrieve all lifetime processed collaborators with birthday images
+  - **Input**: None
+  - **Output**: Array of collaborator objects with image information
+  - **Response Format**:
+    ```json
+    {
+      "collaborators": [
+        {
+          "id": 69,
+          "name": "ANA PINTO",
+          "team": "DAF",
+          "image_url": "https://drive.google.com/file/d/12khs6Axm26ksEiJq01QnZAIF1Qdzo4ao/view?usp=drivesdk",
+          "created_at": "2026-01-30T09:35:55.746Z",
+          "number": "4990",
+          "birthday_date": "06 de Fevereiro"
+        }
+      ]
+    }
+    ```
 
 ## Database Schema
 

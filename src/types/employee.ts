@@ -61,3 +61,13 @@ export interface WorkflowState {
   error: string | null
   generationStarted: boolean
 }
+
+export interface LifetimeCollaborator {
+  id: number
+  name: string
+  team: string
+  image_url: string
+  created_at: string
+  number: string
+  birthday_date: string
+}
