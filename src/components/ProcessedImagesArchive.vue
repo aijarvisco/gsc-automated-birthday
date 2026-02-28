@@ -87,6 +87,17 @@
                 <FileTextIcon class="w-4 h-4" />
                 Export CSV
               </Button>
+
+              <Button
+                @click="downloadAllImages"
+                variant="outline"
+                size="sm"
+                class="gap-2"
+                :disabled="isDownloadingAll || filteredCollaborators.length === 0"
+              >
+                <DownloadIcon class="w-4 h-4" :class="{ 'animate-spin': isDownloadingAll }" />
+                {{ isDownloadingAll ? `Downloading ${downloadAllProgress}...` : 'Download All' }}
+              </Button>
               
               <Button @click="loadCollaborators" variant="outline" size="sm" class="gap-2">
                 <RefreshCwIcon class="w-4 h-4" />
@@ -189,6 +200,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import JSZip from 'jszip'
 import { 
   SearchIcon, 
   DownloadIcon, 
@@ -221,6 +233,8 @@ const error = ref<string | null>(null)
 const searchTerm = ref('')
 const selectedMonth = ref('')
 const downloadingIds = ref<Set<string>>(new Set())
+const isDownloadingAll = ref(false)
+const downloadAllProgress = ref('')
 
 // Month options for filtering
 const monthOptions = [
@@ -392,6 +406,73 @@ const downloadImage = async (collaborator: LifetimeCollaborator) => {
     window.open(collaborator.image_url, '_blank')
   } finally {
     downloadingIds.value.delete(collaboratorId)
+  }
+}
+
+const getDirectImageUrl = (url: string): string => {
+  // Convert Google Drive view URLs to direct image URLs
+  const driveMatch = url.match(/\/file\/d\/([^/]+)/)
+  if (driveMatch) {
+    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`
+  }
+  return url
+}
+
+const getBirthdayDay = (birthdayDate: string): string => {
+  // Extract day from "DD de Mês" format
+  const match = birthdayDate?.match(/^(\d{1,2})/)
+  return match ? match[1].padStart(2, '0') : '00'
+}
+
+const downloadAllImages = async () => {
+  const withImages = filteredCollaborators.value.filter(c => c.image_url)
+  if (withImages.length === 0) return
+
+  isDownloadingAll.value = true
+  downloadAllProgress.value = `0/${withImages.length}`
+
+  const zip = new JSZip()
+  let downloaded = 0
+
+  for (const collaborator of withImages) {
+    try {
+      const directUrl = getDirectImageUrl(collaborator.image_url)
+      const response = await fetch(directUrl)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+      const blob = await response.blob()
+      // Validate that we actually got an image
+      if (!blob.type.startsWith('image/')) {
+        throw new Error(`Received ${blob.type} instead of image`)
+      }
+
+      const ext = blob.type.includes('png') ? 'png' : 'jpg'
+      const day = getBirthdayDay(collaborator.birthday_date)
+      const name = collaborator.name.replace(/\s+/g, '_')
+      const team = (collaborator.team || 'NO-TEAM').replace(/\s+/g, '_')
+      const filename = `${day}_${name}_${team}.${ext}`
+      zip.file(filename, blob)
+    } catch (err) {
+      console.warn(`Failed to download image for ${collaborator.name}:`, err)
+    }
+
+    downloaded++
+    downloadAllProgress.value = `${downloaded}/${withImages.length}`
+  }
+
+  try {
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(zipBlob)
+    link.download = `birthday-images-${new Date().toISOString().split('T')[0]}.zip`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(link.href)
+  } catch (err) {
+    console.error('Failed to generate ZIP:', err)
+  } finally {
+    isDownloadingAll.value = false
   }
 }
 
