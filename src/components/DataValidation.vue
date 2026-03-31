@@ -268,7 +268,7 @@ const validateEmployee = (employee: EmployeeValidation): ValidationStatus => {
   if (!employee.name?.trim()) {
     errors.push('Name is required')
   }
-  if (!employee.number?.trim()) {
+  if (!String(employee.number ?? '').trim()) {
     errors.push('Employee number is required')
   }
   if (!employee.formattedDate?.trim()) {
